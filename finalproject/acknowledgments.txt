@@ -1,4 +1,4 @@
-Programming Assignment 2:  N-Body Simulation
+Final Project
 
 
 /******************************************************************************
@@ -6,6 +6,8 @@ Programming Assignment 2:  N-Body Simulation
  *     - Include help from people, including course staff, lab TAs,
  *       classmates, and friends. Attribute them by name and include the
  *       date(s) on which they helped you.
+ *     - Include other sources of help, like websites, tutorials or
+ *       other books you might have used.
  *     - Do not include course materials (such as the course textbook,
  *       lecture videos, and class meetings).
  *     - Write "none" if you did not receive any help.
@@ -17,19 +19,27 @@ Programming Assignment 2:  N-Body Simulation
 
 [write the dates and help received here]
 
-None
-
 
 /******************************************************************************
  *  Write and sign the following student acknowledgment of original work.
  *  For your signature, type /s/, followed by your name.
- *  Here is an example:
+ *  Each partner must do this. Here is an example:
  *
  *      This programming assignment represents my own work in accordance
  *      with University regulations.  /s/ Ada Lovelace
+ *
+ *      This programming assignment represents my own work in accordance
+ *      with University regulations.  /s/ Alan Turing
  ******************************************************************************/
 
 [write and sign the pledge here]
 
-This programming assignment represents my own work in accordance with University regulations.  
-/s/ Ishaan Bhagat
+
+
+/******************************************************************************
+ *  If you worked with a partner, did you and your partner adhere to the
+ *  rules for partnering as outlined on the course syllabus?
+ *  Write "NA" if you did not work with a partner.
+ ******************************************************************************/
+
+YES / NO / NA
