@@ -18,6 +18,8 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+// Class creating simulation of the orbit between the Earth and Sun, and
+// a corresponding Java Swing GUI to customize said simulation
 public class NBody implements ChangeListener, ActionListener {
 
     // In data type to read in input parameters for Sun and Earth
@@ -135,7 +137,7 @@ public class NBody implements ChangeListener, ActionListener {
 
     // int representing max size of Queue, i.e. the Queue will hold the coordinates
     // of a maximum of these many last points
-    private int maxOrbitQueueSize = 1000;
+    private int maxOrbitQueueSize = 2500;
 
     // double array to hold current mass ratios altered by the two LabeledSliders
     private double[] massRatios = { 1.0, 1.0 };
@@ -173,12 +175,12 @@ public class NBody implements ChangeListener, ActionListener {
     // to scale size of translational velocity vector
     private double velocityRatio = 1.0;
 
-    @SuppressWarnings("checkstyle:StringLiteralCount")
 
     // Method to essentially set simulation to starting position. Re-reads
     // all input parameters, sets all working constants to default values, all
-    // Swing GUI elements to their default states, making sure they have been
-    // initialized first.
+    // Swing GUI elements to their default states, only if first having made sure
+    // they have been initialized first.
+    @SuppressWarnings("checkstyle:StringLiteralCount")
     public void resetPlanets() {
 
         inputParameters = new In("earthsun.txt");
@@ -231,8 +233,10 @@ public class NBody implements ChangeListener, ActionListener {
             planetName = "Earth";
             starName = "Sun";
             song = "2001.wav";
-            earthSlider.setLabel(planetName + " Mass = " + earthSlider.getValue() / 10.0 + "x");
-            sunSlider.setLabel(starName + " Mass = " + sunSlider.getValue() / 10.0 + "x");
+            earthSlider.setLabel(planetName + " Mass = " +
+                                         earthSlider.getValue() / 10.0 + "x");
+            sunSlider.setLabel(starName + " Mass = " +
+                                       sunSlider.getValue() / 10.0 + "x");
             gravityEffect.setSelected(true);
             forceVector.setSelected(false);
             velocityVector.setSelected(false);
@@ -256,7 +260,8 @@ public class NBody implements ChangeListener, ActionListener {
             for (int i = 0; i < n - 1; i++) {
                 for (int j = 0; j < n; j++) {
                     if (i != j) {
-                        // Using Law of Gravitation to determine forces BY each other body ON all n bodies
+                        // Using Law of Gravitation to determine forces BY
+                        // each other body ON all n bodies
                         double dx = px[j] - px[i]; // make sure it's force ON body i
                         double dy = py[j] - py[i];
                         double r = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
@@ -293,52 +298,92 @@ public class NBody implements ChangeListener, ActionListener {
         }
     }
 
+    // Function to represent orbital trail drawn for each iteration of simulation.
     public void iterateOrbit() {
 
         Double[] coordinate = new Double[] { px[0], py[0] };
-        orbitPoints.enqueue(coordinate);
 
-        if (orbitPoints.size() > maxOrbitQueueSize)
-            orbitPoints.dequeue();
+        if (simulate) {
+            // Enqueue newest coordinate
+            orbitPoints.enqueue(coordinate);
 
+            // If Queue is at capacity, dequeue oldest coordinate
+            if (orbitPoints.size() > maxOrbitQueueSize)
+                orbitPoints.dequeue();
+        }
+
+        // Iterate through queue and draw all points
         for (Double[] currentCoordinate : orbitPoints)
             draw.point(currentCoordinate[0], currentCoordinate[1]);
 
+        // This function takes linear time with respect to time, as it depends on
+        // maxOrbitQueueSize or the number of points currently stored in the queue
+        // We settled on 2500 as the size, as we felt it struck a good balance
+        // between being long enough to provide a visually noticeable trail
+        // as well as keeping the simulation animation smooth
+        // A doubling test was performed on the following function (EXTRA CREDIT
+        // ITEM) with maxOrbitQueueSize = 2500 & = 5000. The average time elapsed
+        // between the drawing step in the for loop above for each iteration was
+        // 3.42E-4 seconds and 6.86E-4 seconds for mOQS = 2500 and 5000 respectively.
+        // The times can be seen to have doubled when the Queue size was doubled.
+        // Hence, it can be seen how the function's computation time varies
+        // linearly with the maximum size of the orbitPoints Queue used.
     }
 
+    // Method to draw all components in one iteration of simulation
     @SuppressWarnings("checkstyle:IllegalToken")
     public void drawSimulation() {
+        // Draw universe on top, essentially 'blank canvas'
         draw.picture(0, 0, "starfield.jpg");
+
         for (int i = 0; i < n; i++) {
-            draw.picture(px[i], py[i], image[i], planetPixels[i] * Math.sqrt(massRatios[i]),
+            // Drawing bodies at current positions, scaled to size based on their
+            // current mass ratios and rotated based on angle theta (only for orbiting
+            // planet)
+            draw.picture(px[i], py[i], image[i], planetPixels[i] *
+                                 Math.sqrt(massRatios[i]),
                          planetPixels[i] * Math.sqrt(massRatios[i]), theta * (i ^ 1));
 
+            // If toggled, drawing blue gravitational force vector scaled to size based
+            // on current force ratio, rotated to be always pointing towards center of
+            // other body
             if (showForceVector)
-                draw.picture(px[i], py[i], "blue_arrow.png", arrowLong * Math.sqrt(forceRatio),
+                draw.picture(px[i], py[i], "blue_arrow.png", arrowLong *
+                                     Math.sqrt(forceRatio),
                              arrowShort, (theta + 180 * i));
 
+            // If toggled, drawing green translational velocity vector scaled to size
+            // based on current velocity ratio, rotated to be always pointing towards
+            // direction of velocity
             if (showVelocityVector && i == 0)
                 draw.picture(px[i], py[i], "green_arrow.png", arrowShort,
                              arrowLong * velocityRatio, (alpha + 90));
 
+            // If toggled, drawing orbit trace for all points currently stored
+            // in Queue up until current point
             if (showOrbit)
                 iterateOrbit();
         }
 
+        // Recalculating and displaying number of Earth days passed
         earthDays = (int) (t / SECONDS_PER_DAY);
         draw.text(0.4 * radius, -0.9 * radius, daysPassed + earthDays);
+
+        // Updating drawing and frame, pausing based on current speed toggled
         draw.show();
         frame.repaint();
         draw.pause(simulationSpeedPause);
 
+        // Incrementing interval if simulation is 'not paused'
         if (simulate)
             t = t + interval;
     }
 
+    // Constructor class, initializes and sets up canvas, Swing GUI and starts
+    // simulation loop
     public NBody() {
 
         // Setting up planet parameters
-
         resetPlanets();
         initialized = true;
 
@@ -375,11 +420,13 @@ public class NBody implements ChangeListener, ActionListener {
 
         earthSlider = new LabeledSlider(5, 20, 10);
         earthSlider.addChangeListener(this);
-        earthSlider.setLabel(planetName + " Mass = " + earthSlider.getValue() / 10.0 + "x");
+        earthSlider.setLabel(planetName + " Mass = " +
+                                     earthSlider.getValue() / 10.0 + "x");
 
         sunSlider = new LabeledSlider(5, 20, 10);
         sunSlider.addChangeListener(this);
-        sunSlider.setLabel(starName + " Mass = " + sunSlider.getValue() / 10.0 + "x");
+        sunSlider.setLabel(starName + " Mass = " +
+                                   sunSlider.getValue() / 10.0 + "x");
 
         JPanel earthSliderPanel = new JPanel();
         earthSliderPanel.setLayout(new BorderLayout());
@@ -431,7 +478,8 @@ public class NBody implements ChangeListener, ActionListener {
         JPanel speedRadioButtons = new JPanel();
         speedRadioButtons.setBounds(50, 575, 100, 75);
 
-        BoxLayout radioPanelLayout = new BoxLayout(speedRadioButtons, BoxLayout.Y_AXIS);
+        BoxLayout radioPanelLayout = new BoxLayout(speedRadioButtons,
+                                                   BoxLayout.Y_AXIS);
         speedRadioButtons.setLayout(radioPanelLayout);
 
         speedRadioButtons.add(slowSpeed);
@@ -505,7 +553,8 @@ public class NBody implements ChangeListener, ActionListener {
         gravityEffect.setSelected(true);
 
         JPanel gravityParameters = new JPanel();
-        BoxLayout gravityParametersLayout = new BoxLayout(gravityParameters, BoxLayout.Y_AXIS);
+        BoxLayout gravityParametersLayout = new BoxLayout(gravityParameters,
+                                                          BoxLayout.Y_AXIS);
         gravityParameters.setLayout(gravityParametersLayout);
 
         gravityParameters.setBounds(565, 220, 275, 95);
@@ -547,7 +596,8 @@ public class NBody implements ChangeListener, ActionListener {
 
         bottomText.setFont(new Font(current.getName(), Font.PLAIN, 12));
         bottomText.setText(
-                "<HTML> Made as a final project for COS 126<br> &nbsp; &nbsp; Fall '22, at Princeton University.</HTML>");
+                "<HTML> Made as a final project for COS 126<br> &nbsp; &nbsp; "
+                        + "Fall '22 at Princeton University.</HTML>");
 
 
         frame.add(topTextPanel);
@@ -566,19 +616,27 @@ public class NBody implements ChangeListener, ActionListener {
 
     }
 
+    // Method processing changes in LabeledSlider Swing GUI elements
     public void stateChanged(ChangeEvent e) {
+        // Updating slider value and label, as well as current mass of Earth
         massRatios[0] = earthSlider.getValue() / 10.0;
-        earthSlider.setLabel(planetName + " Mass = " + earthSlider.getValue() / 10.0 + "x");
+        earthSlider.setLabel(planetName + " Mass = " +
+                                     earthSlider.getValue() / 10.0 + "x");
         mass[0] = EARTH_NORMAL_MASS * massRatios[0];
 
+        // Updating slider value and label, as well as current mass of Sun
         massRatios[1] = sunSlider.getValue() / 10.0;
-        sunSlider.setLabel(starName + " Mass = " + sunSlider.getValue() / 10.0 + "x");
+        sunSlider.setLabel(starName + " Mass = " +
+                                   sunSlider.getValue() / 10.0 + "x");
         mass[1] = SUN_NORMAL_MASS * massRatios[1];
 
         frame.repaint();   // repaints sliders and canvas
     }
 
+    // Method processing all other changes in Swing GUI elements
     public void actionPerformed(ActionEvent e) {
+        // Toggling between play and pause button, updating button icon and
+        // boolean simulate's value
         if (e.getSource() == playPauseButton) {
             if (simulate) {
                 simulate = false;
@@ -590,6 +648,8 @@ public class NBody implements ChangeListener, ActionListener {
             }
         }
 
+        // Adjusting simulationSpeedPause duration, i.e. simulation speed based
+        // on current level toggled
         if (e.getSource() == slowSpeed)
             simulationSpeedPause = 20;
         else if (e.getSource() == mediumSpeed)
@@ -597,10 +657,12 @@ public class NBody implements ChangeListener, ActionListener {
         else if (e.getSource() == fastSpeed)
             simulationSpeedPause = 1;
 
+        // Resetting simulation if button is pressed
         if (e.getSource() == resetButton) {
             resetPlanets();
         }
 
+        // Switching music on and off if checkbox is toggled
         if (e.getSource() == playMusic) {
             if (playMusic.isSelected()) {
                 StdAudio.playInBackground(song);
@@ -609,7 +671,10 @@ public class NBody implements ChangeListener, ActionListener {
                 StdAudio.stopInBackground();
         }
 
+        // Processing toggle between StarWars and Normal modes
         if (e.getSource() == starWars) {
+            // When toggled between Normal and Star Wars, updating planet
+            // and star images,updating song filename, updating slider labels.
             if (normalMode) {
                 starWars.setIcon(normal);
                 normalMode = false;
@@ -618,8 +683,10 @@ public class NBody implements ChangeListener, ActionListener {
                 song = "imperialmarch.wav";
                 planetName = "Millenium Falcon";
                 starName = "Death Star";
-                earthSlider.setLabel(planetName + " Mass = " + earthSlider.getValue() / 10.0 + "x");
-                sunSlider.setLabel(starName + " Mass = " + sunSlider.getValue() / 10.0 + "x");
+                earthSlider.setLabel(planetName + " Mass = " +
+                                             earthSlider.getValue() / 10.0 + "x");
+                sunSlider.setLabel(starName + " Mass = " +
+                                           sunSlider.getValue() / 10.0 + "x");
                 if (playMusic.isSelected()) {
                     StdAudio.stopInBackground();
                     StdAudio.playInBackground(song);
@@ -633,16 +700,22 @@ public class NBody implements ChangeListener, ActionListener {
                 song = "2001.wav";
                 planetName = "Earth";
                 starName = "Sun";
-                earthSlider.setLabel(planetName + " Mass = " + earthSlider.getValue() / 10.0 + "x");
-                sunSlider.setLabel(starName + " Mass = " + sunSlider.getValue() / 10.0 + "x");
+                earthSlider.setLabel(planetName + " Mass = " +
+                                             earthSlider.getValue() / 10.0 + "x");
+                sunSlider.setLabel(starName + " Mass = " +
+                                           sunSlider.getValue() / 10.0 + "x");
                 if (playMusic.isSelected()) {
                     StdAudio.stopInBackground();
                     StdAudio.playInBackground(song);
                 }
             }
         }
+
+        // Switching effect of gravity on and off when checkbox is toggled
         if (e.getSource() == gravityEffect) {
             if (!gravityEffect.isSelected()) {
+                // Setting BIG_G and gravitational force to zero to truly
+                // remove effect of gravity
                 BIG_G = 0.0;
                 fx[0] = 0.0;
                 fy[0] = 0.0;
@@ -652,6 +725,8 @@ public class NBody implements ChangeListener, ActionListener {
             }
         }
 
+        // Switching visualization of gravitational force vector on and off
+        // when checkbox is toggled
         if (e.getSource() == forceVector) {
             if (forceVector.isSelected()) {
                 showForceVector = true;
@@ -661,6 +736,8 @@ public class NBody implements ChangeListener, ActionListener {
             }
         }
 
+        // Switching visualization of translational velocity vector on and off
+        // when checkbox is toggled
         if (e.getSource() == velocityVector) {
             if (velocityVector.isSelected()) {
                 showVelocityVector = true;
@@ -670,6 +747,8 @@ public class NBody implements ChangeListener, ActionListener {
             }
         }
 
+        // Switching visualization of orbital path trace on and off
+        // when checkbox is toggled
         if (e.getSource() == orbit) {
             if (orbit.isSelected()) {
                 showOrbit = true;
@@ -681,6 +760,7 @@ public class NBody implements ChangeListener, ActionListener {
 
     }
 
+    // Main method to create instance of NBody() and start simulation
     public static void main(String[] args) {
         new NBody();
     }

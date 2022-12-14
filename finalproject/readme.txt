@@ -22,3 +22,17 @@ abstract:
 ---
 <multiline text>
 ---
+
+Bibliography
+Spirograph.java: Used to understand implementation of Swing with Std Princeton libraries {https://introcs.cs.princeton.edu/java/36inheritance/Spirograph.java.html}
+LabeledSlider.java: Modified and used to implement custom Swing JSlider with preset characteristic {https://introcs.cs.princeton.edu/java/36inheritance/LabeledSlider.java.html}
+GeeksForGeeks.org: Used to understand Swing and API for JSlider, JButton, JRadioButton and JCheckbox {https://www.geeksforgeeks.org/java-swing-jslider/, https://www.geeksforgeeks.org/jradiobutton-java-swing/}
+PhET: Used for inspiration for the physics simulation GUI {https://phet.colorado.edu/sims/html/gravity-and-orbits/latest/gravity-and-orbits_en.html}
+Princeton Class Draw: Studied API for use in code {https://introcs.cs.princeton.edu/java/stdlib/javadoc/Draw.html}
+Princeton Class Queue: Studied API for use in code {https://introcs.cs.princeton.edu/java/code/javadoc/Queue.html}
+Princeton Class Draw: Studied API for use in code {https://introcs.cs.princeton.edu/java/stdlib/javadoc/Draw.html}
+StackOverflow: Used for general debugging, Swing GUI/Layout customization tips {https://stackoverflow.com/}
+Youtube Video by 'Bro Code' - Java GUI Full Course: Heavily used to understand and practice implementation of Swing GUI elements {https://www.youtube.com/watch?v=Kmgo00avvEw&t}
+
+
+
