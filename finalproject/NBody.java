@@ -243,6 +243,7 @@ public class NBody implements ChangeListener, ActionListener {
             orbit.setSelected(false);
             showForceVector = false;
             showVelocityVector = false;
+            showOrbit = false;
             forceRatio = 1.0;
             velocityRatio = 1.0;
             orbitPoints = new Queue<>();
@@ -755,6 +756,7 @@ public class NBody implements ChangeListener, ActionListener {
             }
             else if (!orbit.isSelected()) {
                 showOrbit = false;
+                orbitPoints = new Queue<>();
             }
         }
 
