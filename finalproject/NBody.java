@@ -62,12 +62,11 @@ public class NBody implements ChangeListener, ActionListener {
     private String song = "2001.wav";
 
     // Double representing figurative interval of seconds elapsed between frames
-    private double interval;
-    // Int representing literal interval in milliseconds paused between frames
-    private int simulationSpeedPause = 10;
+    private final double INTERVAL = 25000;
+
     // Double representing seconds in one day on Earth. To be used to calculate
     // number of Earth days elapsed since the simulation started.
-    private double SECONDS_PER_DAY = 86400;
+    private final double SECONDS_PER_DAY = 86400;
     // Double representing G, the gravitational constant used in the equation
     // representing Newton's Law of Gravitation
     private double BIG_G = 6.67E-11;
@@ -82,10 +81,13 @@ public class NBody implements ChangeListener, ActionListener {
     private Draw draw = new Draw();
     // JFrame holding entire simulation window (visuals + GUI)
     private JFrame frame = new JFrame();
+
     // Customized JSlider to control current mass of Earth in simulation
     private LabeledSlider earthSlider;
     // Customized JSlider to control current mass of Sun in simulation
     private LabeledSlider sunSlider;
+    // In reality, effectively 1.0, but have to work with integers with JSlider
+    private final int DEFAULT_SLIDER_VALUE = 10;
     // JButton to 'play' or 'pause' the simulation
     private JButton playPauseButton;
 
@@ -100,6 +102,16 @@ public class NBody implements ChangeListener, ActionListener {
     private JRadioButton mediumSpeed;
     // JRadio Button to set simulation 'speed' to fast
     private JRadioButton fastSpeed;
+
+    // Interval between iterations/frames to achieve 'slow' speed
+    private final int SLOW_SPEED_INTERVAL = 20;
+    // Interval between iterations/frames to achieve 'medium' speed
+    private final int MEDIUM_SPEED_INTERVAL = 10;
+    // Interval between iterations/frames to achieve 'fast' speed
+    private final int FAST_SPEED_INTERVAL = 1;
+
+    // Int representing literal interval in milliseconds paused between frames
+    private int simulationSpeedPause = MEDIUM_SPEED_INTERVAL;
 
     // JButton to reset simulation to original starting state
     private JButton resetButton;
@@ -193,8 +205,6 @@ public class NBody implements ChangeListener, ActionListener {
         mass = new double[n];
         image = new String[n];
 
-        interval = 25000.0;
-
         for (int i = 0; i < n; i++) {
             px[i] = inputParameters.readDouble();
             py[i] = inputParameters.readDouble();
@@ -220,10 +230,10 @@ public class NBody implements ChangeListener, ActionListener {
         arrowLong = radius / 5;
         arrowShort = radius / 15;
         if (initialized) {
-            earthSlider.setValue(10);
-            sunSlider.setValue(10);
+            earthSlider.setValue(DEFAULT_SLIDER_VALUE);
+            sunSlider.setValue(DEFAULT_SLIDER_VALUE);
             mediumSpeed.setSelected(true);
-            simulationSpeedPause = 10;
+            simulationSpeedPause = MEDIUM_SPEED_INTERVAL;
             simulate = false;
             normalMode = true;
             playPauseButton.setIcon(play);
@@ -249,6 +259,18 @@ public class NBody implements ChangeListener, ActionListener {
             orbitPoints = new Queue<>();
         }
     }
+
+    /*/
+    Testing ahead
+        NBody testing = new NBody();
+        testing.simulationSpeedPause = testing.FAST_SPEED_INTERVAL;
+        testing.gravityEffect.setSelected(false);
+        testing.resetPlanets();
+
+        if ((testing.simulationSpeedPause == testing.MEDIUM_SPEED_INTERVAL)
+                && testing.gravityEffect.isSelected())
+            StdOut.println("resetPlanets() method test passed.");
+     */
 
     // Method representing changes in calculations of body parameters per
     // 'frame' or iteration of the simulation
@@ -285,10 +307,10 @@ public class NBody implements ChangeListener, ActionListener {
             for (int i = 0; i < n - 1; i++) {
                 ax = (fx[i] / mass[i]);
                 ay = (fy[i] / mass[i]);
-                vx[i] = vx[i] + ax * interval;
-                vy[i] = vy[i] + ay * interval;
-                px[i] = px[i] + vx[i] * interval;
-                py[i] = py[i] + vy[i] * interval;
+                vx[i] = vx[i] + ax * INTERVAL;
+                vy[i] = vy[i] + ay * INTERVAL;
+                px[i] = px[i] + vx[i] * INTERVAL;
+                py[i] = py[i] + vy[i] * INTERVAL;
             }
 
             // Angle between North and current direction of translational velocity
@@ -298,6 +320,13 @@ public class NBody implements ChangeListener, ActionListener {
 
         }
     }
+
+    /*
+    How we tested:
+    Observe that visualizer path is moving by expected angle and speed, Earth
+    should follow perfectly circular trajectory if GUI elements are left to
+    'default'/normal values.
+     */
 
     // Function to represent orbital trail drawn for each iteration of simulation.
     public void iterateOrbit() {
@@ -329,6 +358,13 @@ public class NBody implements ChangeListener, ActionListener {
         // The times can be seen to have doubled when the Queue size was doubled.
         // Hence, it can be seen how the function's computation time varies
         // linearly with the maximum size of the orbitPoints Queue used.
+
+        /*
+        The following conditions were tested visually:
+        Visualizer only draws orbital trace when checkbox toggled. Trace path resets
+        to default when checkbox is not checked. Trace follows path of Earth exactly
+        and smoothly, even when non-circular and/or erratic.
+         */
     }
 
     // Method to draw all components in one iteration of simulation
@@ -377,8 +413,12 @@ public class NBody implements ChangeListener, ActionListener {
 
         // Incrementing interval if simulation is 'not paused'
         if (simulate)
-            t = t + interval;
+            t = t + INTERVAL;
     }
+
+    /*
+    Visual test. Features work as intended based on proposal.
+     */
 
     // Constructor class, initializes and sets up canvas, Swing GUI and starts
     // simulation loop
@@ -765,6 +805,8 @@ public class NBody implements ChangeListener, ActionListener {
     // Main method to create instance of NBody() and start simulation
     public static void main(String[] args) {
         new NBody();
+
+
     }
 }
 

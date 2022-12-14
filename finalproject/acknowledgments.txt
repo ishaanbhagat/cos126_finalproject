@@ -19,6 +19,8 @@ Final Project
 
 [write the dates and help received here]
 
+12/14/22 Prachi Sinha (lab TA and project advisor)
+
 
 /******************************************************************************
  *  Write and sign the following student acknowledgment of original work.
@@ -34,7 +36,11 @@ Final Project
 
 [write and sign the pledge here]
 
+This programming assignment represents my own work in accordance
+with University regulations.  /s/ Ishaan Bhagat
 
+This programming assignment represents my own work in accordance
+with University regulations.  /s/ Maggie Wang
 
 /******************************************************************************
  *  If you worked with a partner, did you and your partner adhere to the
@@ -43,3 +49,5 @@ Final Project
  ******************************************************************************/
 
 YES / NO / NA
+
+YES
